@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: onlybanaenaes/kn02:kn02b-db
+    container_name: kn02b-db
+    networks:
+      tbznet:
+        ipv4_address: 172.20.5.10
+    expose:
+      - "3306"
+
+  web:
+    image: onlybanaenaes/kn02:kn02b-web
+    container_name: kn02b-web
+    ports:
+      - "8081:80"
+    networks:
+      tbznet:
+        ipv4_address: 172.20.5.11
+    depends_on:
+      - db
+    links:
+      - db:kn02b-db
+
+networks:
+  tbznet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          ip_range: 172.20.5.0/24
+          gateway: 172.20.5.254

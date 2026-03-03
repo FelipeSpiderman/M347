@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:latest
+    container_name: m347-kn04a-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: mysql
+    networks:
+      tbznet:
+        ipv4_address: 172.30.5.10
+    expose:
+      - "3306"
+
+  web:
+    build: ./web
+    container_name: m347-kn04a-web
+    ports:
+      - "80:80"
+    networks:
+      tbznet:
+        ipv4_address: 172.30.5.11
+    depends_on:
+      - db
+    links:
+      - db:m347-kn04a-db
+
+networks:
+  tbznet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+          ip_range: 172.30.5.0/24
+          gateway: 172.30.5.254

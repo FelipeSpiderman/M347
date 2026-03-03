@@ -1,0 +1,108 @@
+#cloud-config
+package_update: true
+packages:
+  - docker.io
+  - docker-compose
+
+write_files:
+  - path: /home/ubuntu/docker-compose.yml
+    content: |
+      version: '3.8'
+      
+      services:
+        db:
+          image: mariadb:latest
+          container_name: m347-kn04a-db
+          environment:
+            MYSQL_ROOT_PASSWORD: rootpass
+            MYSQL_DATABASE: mysql
+          networks:
+            tbznet:
+              ipv4_address: 172.10.5.10
+          expose:
+            - "3306"
+        
+        web:
+          build: ./web
+          container_name: m347-kn04a-web
+          ports:
+            - "80:80"
+          networks:
+            tbznet:
+              ipv4_address: 172.10.5.11
+          depends_on:
+            - db
+          links:
+            - db:m347-kn04a-db
+      
+      networks:
+        tbznet:
+          driver: bridge
+          ipam:
+            config:
+              - subnet: 172.10.0.0/16
+                ip_range: 172.10.5.0/24
+                gateway: 172.10.5.254
+    owner: root:root
+    permissions: '0644'
+
+  - path: /home/ubuntu/web/Dockerfile
+    content: |
+      FROM php:8.0-apache
+      COPY info.php /var/www/html/
+      COPY db.php /var/www/html/
+      RUN docker-php-ext-install mysqli
+      EXPOSE 80
+    owner: root:root
+    permissions: '0644'
+
+  - path: /home/ubuntu/web/info.php
+    content: |
+      <?php
+      phpinfo();
+      ?>
+    owner: root:root
+    permissions: '0644'
+
+  - path: /home/ubuntu/web/db.php
+    content: |
+      <html>
+      <head></head>
+      <body>
+      Diese Seite macht eine Abfrage auf die Datenbank. <br />
+      Das ausgeführte Query ist: <i>select Host, User from mysql.user;</i><br /><br />
+      Das Resultat: <br />
+      <?php
+        $servername = "m347-kn04a-db";
+        $username = "root";
+        $password = "rootpass";
+        $dbname = "mysql";
+
+        $conn = new mysqli($servername, $username, $password, $dbname);
+        if ($conn->connect_error) {
+          die("Connection failed: " . $conn->connect_error);
+        }
+
+        $sql = "select Host, User from mysql.user;";
+        $result = $conn->query($sql);
+        while($row = $result->fetch_assoc()){
+          echo("<li>" . $row["Host"] . " / " . $row["User"] . "</li>");
+        }
+      ?>
+      </body>
+      </html>
+    owner: root:root
+    permissions: '0644'
+
+ssh_authorized_keys:
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC... Felipe@Felipe
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC... lehrer@tbz
+
+runcmd:
+  - systemctl start docker
+  - systemctl enable docker
+  - usermod -aG docker ubuntu
+  - cd /home/ubuntu && docker compose up -d --build
+  - sleep 30
+
+final_message: "Cloud-Init abgeschlossen! System ist bereit."
