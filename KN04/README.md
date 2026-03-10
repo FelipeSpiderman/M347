@@ -247,7 +247,7 @@ runcmd:
   - cd /home/ubuntu && docker compose up -d --build
   - sleep 30
 
-final_message: "Cloud-Init abgeschlossen! System ist bereit."
+final_message: "Cloud-Init abgeschlossen. System ist bereit."
 ```
 
 ### Screenshots

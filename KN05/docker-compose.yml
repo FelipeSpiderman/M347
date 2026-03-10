@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  nginx1:
+    image: nginx
+    volumes:
+      # Named Volume - Long Syntax
+      - type: volume
+        source: my-named-volume
+        target: /data
+      # Bind Mount
+      - type: bind
+        source: ./bind-folder
+        target: /bind-mount
+      # tmpfs
+      - type: tmpfs
+        target: /tmpfs
+    ports:
+      - "8081:80"
+    container_name: kn05-nginx1
+
+  nginx2:
+    image: nginx
+    # Named Volume - Short Syntax
+    volumes:
+      - my-named-volume:/data
+    ports:
+      - "8082:80"
+    container_name: kn05-nginx2
+
+volumes:
+  my-named-volume:
