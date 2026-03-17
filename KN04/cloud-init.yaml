@@ -8,7 +8,7 @@ write_files:
   - path: /home/ubuntu/docker-compose.yml
     content: |
       version: '3.8'
-      
+
       services:
         db:
           image: mariadb:latest
@@ -34,7 +34,7 @@ write_files:
             - db
           links:
             - db:m347-kn04a-db
-      
+
       networks:
         tbznet:
           driver: bridge
@@ -44,7 +44,7 @@ write_files:
                 ip_range: 172.10.5.0/24
                 gateway: 172.10.5.254
     owner: root:root
-    permissions: '0644'
+    permissions: "0644"
 
   - path: /home/ubuntu/web/Dockerfile
     content: |
@@ -54,7 +54,7 @@ write_files:
       RUN docker-php-ext-install mysqli
       EXPOSE 80
     owner: root:root
-    permissions: '0644'
+    permissions: "0644"
 
   - path: /home/ubuntu/web/info.php
     content: |
@@ -62,7 +62,7 @@ write_files:
       phpinfo();
       ?>
     owner: root:root
-    permissions: '0644'
+    permissions: "0644"
 
   - path: /home/ubuntu/web/db.php
     content: |
@@ -92,11 +92,11 @@ write_files:
       </body>
       </html>
     owner: root:root
-    permissions: '0644'
+    permissions: "0644"
 
 ssh_authorized_keys:
-  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC... Felipe@Felipe
-  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC... lehrer@tbz
+  - ssh-rsa MIIEpAIBAAKCAQEAuigALnIPUHW9bf833jX2HacqI2lkwxKt9ZMSpBi2nMqYaVXQIMnDkUQ/uqYZL4URrVq+Y6h6826ci0jg/DNXrYUA1qB4luANxasXQd+50ltcDYrMB+jGkhaCliSkmQN4v8r9HnwVKR81tvvaZzBh9U2JtdSIhRo5RbTAZOrCJC/aMY9aBQr9cOYtFTxw5uoG6UDhD//ORpXGyhQRJHfGWkV2PKP0y01gkcEzZedRGHti+gAv9QFNhw9ZuXBtmBXRA/FroGAgP99EIZ8pc5d6iVGxWFRDGk8CzxxD9HbqimBNpXmKJwFVKIwauny27/G84Ay2KcSzZ1F12qhmXr70KwIDAQABAoIBAQCQD3acet5JGOTApBp7F21gY0Yj42L754/CFM//N7TSP6KVGbiYNyvmVlevPO0Orj8Q1cGy4+ZKTtZMn9iks6LtgJk2fzbzI27lAtNbwiROmy7wt/HPSR+qXEswoCjU1S/z1MXvenzxttpdwiexZWrZZ+jjUxdXUgTyYb/mGRqm3yNr8BKTSPK4YWZN8Beiw1GkQGsr7vB3JzB0t47ujD64ZP+Z9lJxMo6/iU1QRuvGW2b5NZrocIjDWFCyWv1dvf+CukVSw3n76i/Bc5ec4BHCKh4lzDbrHfEiynHqGI1ez81h//hMyjjy+nxvWv2hTQ6gIGgL1u3LlKJYWsJ/99RhAoGBANutjkXA9ZCVx2RcGxAerd1K1H4VunhiQAJSUroN5Bj8FO6qczpNgxO6ez9T6RuU0i2UjsObDKUAr3PGbhAYO5vpIwilcKcw3jQqKi1BHp0pDULAWB507W4muaW6BWh62darVkgO6HifrQfxT8YoU41YzLvl0Lc8AZQeormouGOxAoGBANjvjSH/q7KjOOrMRNmNXB3zb19oPNfpvNteitUuo1GErIyvOsvjTD3CFpEvPiWeMgXHbKr07jJChOMQTVlXbyvjnyfkg9LZRC/vXSevYIRTJjCuF3ejJAddv4vTtkEV/D6v4/rQGa405FiXE2eb+lCs0v+o/H37MiwABzcEYhibAoGBAI/WGMTFbkRoPbERucqZO+AcYfvYgErYke6zNmWKOOK/E3md82qmW//r50z0xToA/IlJrxyWhfX39+mHcINrSoRwZzb/FD70eVmQjiMpc0EWIw+k302548hu5LmFjor1fXLYptrxn/dzHZmIwGIP/30aOpuBA2MmkCYK1SNZPLpRAoGATvug4fEJXWfqECrBIohCMrFwKkd0Z5Q1a5VXbNinI8XvYOVnvdYK6y1gNAoEUYPwaIQ8P14f33KymU1VLCMWWd9tEgQ0Lq9mESHQQ+Ope2QesnigGLHwKzJpzAoQAFB134kAs0/TGccuIEcZDI8QqxDRXb3z+BZeJQD5n4FcCeMCgYAKSu5TCZiNJjLcrv/j9PxrNRSVDrVvH3rbnIz+zWJAe/wqPtC1ppm0AHGggRpSxLc+oXMnnwgBv0DuOQ9L4DDaaWT0yC6eT9v0EEsVKvz93OpZVZWWDBTfR4cT6g6qAQYQJRQSzyRlZ6ndmyPqwLKMSTwuXDhCS66loMIH833qnA== aws-key
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDCBbHvAj9/hYpjc4T02Hkmpax2g+o+PaLo4cG+NYSeibea+mL60JY1jdj8mfdFJoZKkXB1DPY3hoJNvck8A6MquKr4pA4fYUiQ2F2z4zJix5/bFY5YFuz2Lybf614glCEcey9N9Q+mrtt55HhSFpFuRz5fEfKZOL2K5nL9wCGWKkC8UFwrNeXmb6H2xR1UmtafXXQuvf2V8/srJvwT2yk+x4QJkfQlokYTlQ07/OsGYTbLIwDNJkmSiVYI9mQp1q1qvRhm5Ulxr9eO3VTyxQiFfB5cLMe3oVVJZDtq5q2sxb7OZu1sL8ozB1wiSdBR5/ZHSXhiva5dI7tSCIwUzUq5 aws-key
 
 runcmd:
   - systemctl start docker

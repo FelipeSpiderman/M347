@@ -4,10 +4,13 @@
 
 ### Teil a) Verwendung von Original Images
 
+![alt text](images/image.png)
+![alt text](images/image2.png)
+
 #### docker-compose.yml
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   db:
@@ -59,19 +62,14 @@ EXPOSE 80
 
 `docker compose up` ist eine Zusammenfassung für folgende Befehle:
 
-| Befehl | Erklärung |
-|--------|-----------|
-| `docker network create` | Erstellt das Netzwerk (tbznet) |
-| `docker build` | Baut das Web-Image aus dem Dockerfile |
-| `docker pull` | Pullt das mariadb Image |
-| `docker create` | Erstellt Container aus Images |
-| `docker network connect` | Verbindet Container mit Netzwerk |
-| `docker start` | Startet die Container |
-
-#### Screenshots
-
-![info.php](Images/kn04a-info.png)
-![db.php](Images/kn04a-db.png)
+| Befehl                   | Erklärung                             |
+| ------------------------ | ------------------------------------- |
+| `docker network create`  | Erstellt das Netzwerk (tbznet)        |
+| `docker build`           | Baut das Web-Image aus dem Dockerfile |
+| `docker pull`            | Pullt das mariadb Image               |
+| `docker create`          | Erstellt Container aus Images         |
+| `docker network connect` | Verbindet Container mit Netzwerk      |
+| `docker start`           | Startet die Container                 |
 
 ---
 
@@ -80,7 +78,7 @@ EXPOSE 80
 #### docker-compose-own.yml
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   db:
@@ -119,20 +117,22 @@ networks:
 
 **Fehler:** "Connection failed: php_network_getaddresses: getaddrinfo failed: Name or service not known"
 
-**Ursache:** 
+**Ursache:**
+
 - In der `db.php` aus KN02 ist der Hostname fest auf `"kn02b-db"` eingecodet
 - Wenn der Container anders heisst (z.B. `m347-kn04a-db`), kann die Datenbank nicht gefunden werden
 - Auch wenn Docker Compose den Container umbenennt, stimmt der hostname in der PHP-Datei nicht mehr
 
 **Lösung:**
+
 - Die `db.php` muss den korrekten Container-Namen verwenden
 - Oder: Environment-Variablen verwenden `$servername = getenv('DB_HOST') ?: 'localhost';`
 - Oder: Das Netzwerk und die Hostnamen in docker-compose.yml korrekt konfigurieren
 
 #### Screenshots
 
-![info.php](Images/kn04b-info.png)
-![db.php Error](Images/kn04b-db-error.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
 
 ---
 
@@ -151,7 +151,7 @@ write_files:
   - path: /home/ubuntu/docker-compose.yml
     content: |
       version: '3.8'
-      
+
       services:
         db:
           image: mariadb:latest
@@ -177,7 +177,7 @@ write_files:
             - db
           links:
             - db:m347-kn04a-db
-      
+
       networks:
         tbznet:
           driver: bridge
@@ -187,7 +187,7 @@ write_files:
                 ip_range: 172.10.5.0/24
                 gateway: 172.10.5.254
     owner: root:root
-    permissions: '0644'
+    permissions: "0644"
 
   - path: /home/ubuntu/web/Dockerfile
     content: |
@@ -197,7 +197,7 @@ write_files:
       RUN docker-php-ext-install mysqli
       EXPOSE 80
     owner: root:root
-    permissions: '0644'
+    permissions: "0644"
 
   - path: /home/ubuntu/web/info.php
     content: |
@@ -205,7 +205,7 @@ write_files:
       phpinfo();
       ?>
     owner: root:root
-    permissions: '0644'
+    permissions: "0644"
 
   - path: /home/ubuntu/web/db.php
     content: |
@@ -235,7 +235,7 @@ write_files:
       </body>
       </html>
     owner: root:root
-    permissions: '0644'
+    permissions: "0644"
 
 ssh_authorized_keys:
   - ssh-rsa YOUR_PUBLIC_KEY Felipe@Felipe
