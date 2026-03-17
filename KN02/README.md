@@ -27,7 +27,7 @@ docker push onlybanaenaes/kn02:kn02a
 ### Screenshots
 
 ![Docker Desktop kn02a](Images/image.png)
-![helloworld.html im Browser](Images/image copy.png)
+![helloworld.html im Browser](Images/image-copy.png)
 
 ---
 
@@ -62,7 +62,7 @@ docker push onlybanaenaes/kn02:kn02b-db
 
 #### Screenshot Telnet
 
-![Telnet DB Verbindung](Images/image copy 2.png)
+![Telnet DB Verbindung](Images/image-copy- 2.png)
 
 ---
 
@@ -102,6 +102,6 @@ docker push onlybanaenaes/kn02:kn02b-web
 
 #### Screenshots
 
-![info.php im Browser](Images/image copy 3.png)
-![db.php im Browser](Images/image copy 4.png)
-![Docker Desktop alle Images](Images/image copy 5.png)
+![info.php im Browser](Images/image-copy-3.png)
+![db.php im Browser](Images/image-copy-4.png)
+![Docker Desktop alle Images](Images/image-copy-5.png)
