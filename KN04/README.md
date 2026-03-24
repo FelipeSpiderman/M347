@@ -4,9 +4,6 @@
 
 ### Teil a) Verwendung von Original Images
 
-![alt text](images/image.png)
-![alt text](images/image2.png)
-
 #### docker-compose.yml
 
 ```yaml
@@ -131,8 +128,8 @@ networks:
 
 #### Screenshots
 
-![alt text](image-1.png)
-![alt text](image-2.png)
+![alt text](images/image-1.png)
+![alt text](images/image-2.png)
 
 ---
 
@@ -150,8 +147,6 @@ packages:
 write_files:
   - path: /home/ubuntu/docker-compose.yml
     content: |
-      version: '3.8'
-
       services:
         db:
           image: mariadb:latest
@@ -252,5 +247,5 @@ final_message: "Cloud-Init abgeschlossen. System ist bereit."
 
 ### Screenshots
 
-![info.php Cloud](Images/cloud-info.png)
-![db.php Cloud](Images/cloud-db.png)
+![alt text](images/image-3.png)
+![alt text](images/image-4.png)
