@@ -2,31 +2,39 @@
 
 ## Übersicht
 
-| Teil | Aufgabe | Abgabe |
-|------|---------|--------|
-| A | Bind Mounts | Befehlsliste + Screencast |
-| B | Volumes | Befehlsliste + Screencast |
-| C | Docker Compose | mount-Ausgabe + docker-compose.yml |
+| Teil | Aufgabe        | Abgabe                             |
+| ---- | -------------- | ---------------------------------- |
+| A    | Bind Mounts    | Befehlsliste + Screencast          |
+| B    | Volumes        | Befehlsliste + Screencast          |
+| C    | Docker Compose | mount-Ausgabe + docker-compose.yml |
 
 ---
 
 ## A) Bind Mounts (40%)
 
+![alt text](image.png)
+![alt text](image-1.png)
+
 ### Ziel
+
 Speicher vom Host mit dem Container teilen. Änderungen auf Host sollen sofort im Container sichtbar sein.
 
 ### Durchführung
 
 1. **Container mit Bind Mount erstellen:**
+
    ```bash
-   docker run -d --name nginx-bind -p 8080:80 -v C:\Users\DeinName\Documents\Git\M347\KN05\host-folder:/usr/share/nginx/html nginx
+   docker run -d --name nginx-bind -p 8080:80 -v /home/felipe/Documents/Git/M347/KN05/host-folder:/usr/share/nginx/html nginx
    ```
+
    Oder unter Linux/Mac:
+
    ```bash
    docker run -d --name nginx-bind -p 8080:80 -v $(pwd)/host-folder:/usr/share/nginx/html nginx
    ```
 
 2. **Bash-Skript auf Host erstellen** (einzigartig - eigene Lösung):
+
    ```bash
    #!/bin/bash
    echo "Eigene eindeutige Ausgabe - [Dein Name]"
@@ -34,6 +42,7 @@ Speicher vom Host mit dem Container teilen. Änderungen auf Host sollen sofort i
    ```
 
 3. **Skript im Container ausführen:**
+
    ```bash
    docker exec nginx-bind bash /usr/share/nginx/html/script.sh
    ```
@@ -49,33 +58,40 @@ Speicher vom Host mit dem Container teilen. Änderungen auf Host sollen sofort i
 
 ## B) Volumes (30%)
 
+![alt text](image-2.png)
+![alt text](image-3.png)
+
 ### Ziel
+
 Zwei Container verwenden dasselbe Named Volume.
 
 ### Durchführung
 
 1. **Named Volume erstellen:**
+
    ```bash
    docker volume create shared-volume
    ```
 
 2. **Zwei Container mit gleichem Volume starten:**
+
    ```bash
    docker run -d --name container1 -v shared-volume:/data nginx
    docker run -d --name container2 -v shared-volume:/data nginx
    ```
 
 3. **In Datei schreiben und lesen:**
+
    ```bash
    # Container 1: Schreiben
    docker exec container1 sh -c 'echo "Von Container1" >> /data/test.txt'
-   
+
    # Container 2: Lesen
    docker exec container2 cat /data/test.txt
-   
+
    # Container 2: Schreiben
    docker exec container2 sh -c 'echo "Von Container2" >> /data/test.txt'
-   
+
    # Container 1: Lesen
    docker exec container1 cat /data/test.txt
    ```
@@ -90,12 +106,13 @@ Zwei Container verwenden dasselbe Named Volume.
 ## C) Speicher mit Docker Compose (30%)
 
 ### Ziel
+
 Alle drei Speichertypen in docker-compose verwenden.
 
 ### docker-compose.yml
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   nginx1:
@@ -157,9 +174,10 @@ volumes:
 
 ---
 
-## ✅ Komplette Checkliste für die Abgabe
+## Komplette Checkliste für die Abgabe
 
 ### Teil A: Bind Mounts
+
 - [ ] Container mit Bind Mount starten (Befehl ins README)
 - [ ] script.sh in host-folder/ anpassen (eigene Lösung)
 - [ ] Im Container ausführen
@@ -168,6 +186,7 @@ volumes:
 - [ ] Befehlsliste ins README dokumentieren
 
 ### Teil B: Volumes
+
 - [ ] Named Volume erstellen
 - [ ] 2 Container starten
 - [ ] Gegenseitig schreiben/lesen
@@ -175,6 +194,7 @@ volumes:
 - [ ] Befehlsliste ins README dokumentieren
 
 ### Teil C: Docker Compose
+
 - [ ] docker compose up -d
 - [ ] `docker exec kn05-nginx1 mount` ausführen → ins README
 - [ ] `docker exec kn05-nginx2 mount` ausführen → ins README
