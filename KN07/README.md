@@ -1,5 +1,10 @@
 # KN07 - Kubernetes II
 
+![alt text](images/image.png)
+![alt text](images/image-copy.png)
+![alt text](images/image-copy-2.png)
+![alt text](images/image-copy-3.png)
+
 ## Teil A: Begriffe und Konzepte
 
 Die Erklärungen zu den Begriffen befinden sich in [teil_a.md](./teil_a.md).
@@ -14,13 +19,13 @@ Dieses Projekt部署 eine Web-Anwendung (Mongo Express) mit einer MongoDB Datenb
 
 ### Verwendete Dateien
 
-| Datei | Beschreibung |
-|-------|---------------|
-| `mongo-config.yaml` | ConfigMap mit MongoDB URL |
-| `mongo-deployment.yaml` | Deployment für MongoDB |
-| `mongo-service.yaml` | Service für MongoDB (ClusterIP) |
-| `webapp-deployment.yaml` | Deployment für Web-App |
-| `webapp-service.yaml` | Service für Web-App (NodePort) |
+| Datei                    | Beschreibung                    |
+| ------------------------ | ------------------------------- |
+| `mongo-config.yaml`      | ConfigMap mit MongoDB URL       |
+| `mongo-deployment.yaml`  | Deployment für MongoDB          |
+| `mongo-service.yaml`     | Service für MongoDB (ClusterIP) |
+| `webapp-deployment.yaml` | Deployment für Web-App          |
+| `webapp-service.yaml`    | Service für Web-App (NodePort)  |
 
 ### Deployment
 
@@ -57,6 +62,7 @@ kubectl apply -f webapp-service.yaml
 #### 3. Service Webapp Screenshots
 
 **Befehl**:
+
 ```bash
 microk8s kubectl describe service webapp-service
 ```
@@ -68,6 +74,7 @@ microk8s kubectl describe service webapp-service
 #### 4. Unterschiede mongo-service vs webapp-service
 
 **Befehl**:
+
 ```bash
 microk8s kubectl describe service mongo-service
 ```
@@ -75,6 +82,7 @@ microk8s kubectl describe service mongo-service
 **Screenshots**: [images/mongo-service.png](images/mongo-service.png)
 
 **Unterschied**:
+
 - `mongo-service`: Typ ClusterIP (nur intern erreichbar, Port 27017)
 - `webapp-service`: Typ NodePort (extern erreichbar, NodePort 30100)
 
@@ -84,7 +92,8 @@ microk8s kubectl describe service mongo-service
 
 **URL**: `http://<NODE_IP>:30100`
 
-**Screenshots**: 
+**Screenshots**:
+
 - [images/webapp-browser-node1.png](images/webapp-browser-node1.png)
 - [images/webapp-browser-node2.png](images/webapp-browser-node2.png)
 
@@ -103,16 +112,19 @@ microk8s kubectl describe service mongo-service
 #### 7. Update: Port 32000 und 3 Replicas
 
 **Änderungen in webapp-service.yaml**:
+
 - `nodePort`: 30100 → 32000
 - `replicas`: 1 → 3 (im Deployment)
 
 **Anwenden**:
+
 ```bash
 kubectl apply -f webapp-service.yaml
 kubectl apply -f webapp-deployment.yaml
 ```
 
 **Screenshots**:
+
 - [images/webapp-updated.png](images/webapp-updated.png)
 - [images/webapp-service-updated.png](images/webapp-service-updated.png)
 
