@@ -21,7 +21,7 @@ services:
     depends_on:
       - db
     links:
-      - db:m347-kn04a-db
+      - db:kn02b-db
 
 networks:
   tbznet:

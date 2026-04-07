@@ -1,5 +1,8 @@
 # KN04: Docker Compose
 
+![Docker Desktop alle Images](images/image.png)
+![Docker Desktop alle Images](images/image-copy.png)
+
 ## A) Docker Compose: Lokal
 
 ### Teil a) Verwendung von Original Images
@@ -110,21 +113,26 @@ networks:
           gateway: 172.20.5.254
 ```
 
-#### Erklärung des Fehlers
+#### Erklärung der Lösung
 
-**Fehler:** "Connection failed: php_network_getaddresses: getaddrinfo failed: Name or service not known"
+**Problem:** "Connection failed: php_network_getaddresses: getaddrinfo failed: Name or service not known"
 
 **Ursache:**
 
-- In der `db.php` aus KN02 ist der Hostname fest auf `"kn02b-db"` eingecodet
-- Wenn der Container anders heisst (z.B. `m347-kn04a-db`), kann die Datenbank nicht gefunden werden
-- Auch wenn Docker Compose den Container umbenennt, stimmt der hostname in der PHP-Datei nicht mehr
+- In `docker-compose-own.yml` wurde der DB-Container mit `links: - db:m347-kn04a-db` auf einen falschen Hostname gemapped
+- Die `db.php` aus KN02 verwendet den Hostname `"kn02b-db"`
+- Der Link sollte aber auf `kn02b-db` zeigen, nicht auf `m347-kn04a-db`
 
 **Lösung:**
 
-- Die `db.php` muss den korrekten Container-Namen verwenden
-- Oder: Environment-Variablen verwenden `$servername = getenv('DB_HOST') ?: 'localhost';`
-- Oder: Das Netzwerk und die Hostnamen in docker-compose.yml korrekt konfigurieren
+In `docker-compose-own.yml` wurde der Link korrigiert:
+
+```yaml
+links:
+  - db:kn02b-db
+```
+
+Nun kann die Web-App die Datenbank über den korrekten Hostname `kn02b-db` erreichen.
 
 #### Screenshots
 
