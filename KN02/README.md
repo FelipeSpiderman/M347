@@ -62,7 +62,7 @@ docker push onlybanaenaes/kn02:kn02b-db
 
 #### Screenshot Telnet
 
-![Telnet DB Verbindung](Images/image-copy- 2.png)
+![Telnet DB Verbindung](Images/image-copy-2.png)
 
 ---
 
