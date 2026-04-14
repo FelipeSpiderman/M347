@@ -8,7 +8,7 @@
 
 **Replica**: Ein Replica ist eine identische Kopie eines Pods. Durch Replicas wird die Anwendung skaliert und hochverfügbar gemacht. Wenn ein Pod ausfällt, sorgt Kubernetes dafür, dass ein neues Replica gestartet wird.
 
----
+--- 
 
 ### 2. Unterschied zwischen Service und Deployment
 
