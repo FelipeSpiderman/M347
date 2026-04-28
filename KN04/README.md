@@ -1,52 +1,19 @@
 # KN04: Docker Compose
 
-![Docker Desktop alle Images](images/image.png)
-![Docker Desktop alle Images](images/image-copy.png)
+## Screenshots
+
+![Docker Desktop Images](images/image.png)
+![Docker Compose running](images/image-copy.png)
+
+---
 
 ## A) Docker Compose: Lokal
 
-### Teil a) Verwendung von Original Images
+### Teil a) Original Images
 
 #### docker-compose.yml
 
-```yaml
-version: "3.8"
-
-services:
-  db:
-    image: mariadb:latest
-    container_name: m347-kn04a-db
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: mysql
-    networks:
-      tbznet:
-        ipv4_address: 172.10.5.10
-    expose:
-      - "3306"
-
-  web:
-    build: ./web
-    container_name: m347-kn04a-web
-    ports:
-      - "8080:80"
-    networks:
-      tbznet:
-        ipv4_address: 172.10.5.11
-    depends_on:
-      - db
-    links:
-      - db:m347-kn04a-db
-
-networks:
-  tbznet:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.10.0.0/16
-          ip_range: 172.10.5.0/24
-          gateway: 172.10.5.254
-```
+Siehe [docker-compose.yml](./docker-compose.yml)
 
 #### Dockerfile für Webserver
 
@@ -58,202 +25,91 @@ RUN docker-php-ext-install mysqli
 EXPOSE 80
 ```
 
-#### Befehle für docker compose up
+Siehe auch [web/Dockerfile](./web/Dockerfile)
 
-`docker compose up` ist eine Zusammenfassung für folgende Befehle:
+#### docker compose up Erklärung
 
-| Befehl                   | Erklärung                             |
-| ------------------------ | ------------------------------------- |
-| `docker network create`  | Erstellt das Netzwerk (tbznet)        |
-| `docker build`           | Baut das Web-Image aus dem Dockerfile |
-| `docker pull`            | Pullt das mariadb Image               |
-| `docker create`          | Erstellt Container aus Images         |
-| `docker network connect` | Verbindet Container mit Netzwerk      |
-| `docker start`           | Startet die Container                 |
+`docker compose up` führt automatisch folgende Befehle aus:
+
+| Befehl | Erklärung |
+|--------|-----------|
+| `docker network create` | Erstellt das Netzwerk (tbznet) |
+| `docker build` | Baut das Web-Image aus dem Dockerfile |
+| `docker pull` | Pullt das mariadb Image |
+| `docker create` | Erstellt Container aus Images |
+| `docker network connect` | Verbindet Container mit Netzwerk |
+| `docker start` | Startet die Container |
+
+#### Screenshots
+
+![info.php mit IPs](images/image-3.png)
+![db.php mit DB-Daten](images/image-4.png)
 
 ---
 
-### Teil b) Verwendung Ihrer eigenen Images
+### Teil b) Eigene Images (aus KN02)
 
 #### docker-compose-own.yml
 
-```yaml
-version: "3.8"
+Siehe [docker-compose-own.yml](./docker-compose-own.yml)
 
-services:
-  db:
-    image: onlybanaenaes/kn02:kn02b-db
-    container_name: kn02b-db
-    networks:
-      tbznet:
-        ipv4_address: 172.20.5.10
-    expose:
-      - "3306"
+#### Fehlerbehebung
 
-  web:
-    image: onlybanaenaes/kn02:kn02b-web
-    container_name: kn02b-web
-    ports:
-      - "8081:80"
-    networks:
-      tbznet:
-        ipv4_address: 172.20.5.11
-    depends_on:
-      - db
-    links:
-      - db:kn02b-db
-
-networks:
-  tbznet:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-          ip_range: 172.20.5.0/24
-          gateway: 172.20.5.254
+**Fehler:**
 ```
-
-#### Erklärung der Lösung
-
-**Problem:** "Connection failed: php_network_getaddresses: getaddrinfo failed: Name or service not known"
+php_network_getaddresses: getaddrinfo failed: Name or service not known
+```
 
 **Ursache:**
 
-- In `docker-compose-own.yml` wurde der DB-Container mit `links: - db:m347-kn04a-db` auf einen falschen Hostname gemapped
-- Die `db.php` aus KN02 verwendet den Hostname `"kn02b-db"`
-- Der Link sollte aber auf `kn02b-db` zeigen, nicht auf `m347-kn04a-db`
-
-**Lösung:**
-
-In `docker-compose-own.yml` wurde der Link korrigiert:
+Die `db.php` aus KN02 verwendet den Hostname `kn02b-db`. In der ursprünglichen `docker-compose-own.yml` wurde der Link falsch konfiguriert:
 
 ```yaml
+# Falsch:
+links:
+  - db:m347-kn04a-db
+
+# Richtig:
 links:
   - db:kn02b-db
 ```
 
-Nun kann die Web-App die Datenbank über den korrekten Hostname `kn02b-db` erreichen.
+**Lösung:**
+
+Der `links`-Alias muss dem Hostname in der `db.php` entsprechen. Dadurch wird der DB-Container unter dem Namen `kn02b-db` erreichbar.
 
 #### Screenshots
 
-![alt text](images/image-1.png)
-![alt text](images/image-2.png)
+![info.php](images/image-1.png)
+![db.php](images/image-2.png)
 
 ---
 
 ## B) Docker Compose: Cloud
 
-### cloud-init.yml
+### Cloud-Init Konfiguration
 
-```yaml
-#cloud-config
-package_update: true
-packages:
-  - docker.io
-  - docker-compose
+Siehe [cloud-init.yaml](./cloud-init.yaml)
 
-write_files:
-  - path: /home/ubuntu/docker-compose.yml
-    content: |
-      services:
-        db:
-          image: mariadb:latest
-          container_name: m347-kn04a-db
-          environment:
-            MYSQL_ROOT_PASSWORD: rootpass
-            MYSQL_DATABASE: mysql
-          networks:
-            tbznet:
-              ipv4_address: 172.10.5.10
-          expose:
-            - "3306"
-        
-        web:
-          build: ./web
-          container_name: m347-kn04a-web
-          ports:
-            - "80:80"
-          networks:
-            tbznet:
-              ipv4_address: 172.10.5.11
-          depends_on:
-            - db
-          links:
-            - db:m347-kn04a-db
+#### Wichtige Konfigurationen
 
-      networks:
-        tbznet:
-          driver: bridge
-          ipam:
-            config:
-              - subnet: 172.10.0.0/16
-                ip_range: 172.10.5.0/24
-                gateway: 172.10.5.254
-    owner: root:root
-    permissions: "0644"
+- **Docker Installation:** Via `package_update` und `packages` (docker.io, docker-compose)
+- **Docker Compose Files:** Via `write_files` in `/home/ubuntu/`
+- **SSH Keys:** Via `ssh_authorized_keys` (eigener Key + Lehrperson-Key)
+- **Start:** Via `runcmd` mit `docker compose up -d`
 
-  - path: /home/ubuntu/web/Dockerfile
-    content: |
-      FROM php:8.0-apache
-      COPY info.php /var/www/html/
-      COPY db.php /var/www/html/
-      RUN docker-php-ext-install mysqli
-      EXPOSE 80
-    owner: root:root
-    permissions: "0644"
+#### Screenshots
 
-  - path: /home/ubuntu/web/info.php
-    content: |
-      <?php
-      phpinfo();
-      ?>
-    owner: root:root
-    permissions: "0644"
+![Cloud info.php](images/image-3.png)
+![Cloud db.php](images/image-4.png)
 
-  - path: /home/ubuntu/web/db.php
-    content: |
-      <html>
-      <head></head>
-      <body>
-      Diese Seite macht eine Abfrage auf die Datenbank. <br />
-      Das ausgeführte Query ist: <i>select Host, User from mysql.user;</i><br /><br />
-      Das Resultat: <br />
-      <?php
-        $servername = "m347-kn04a-db";
-        $username = "root";
-        $password = "rootpass";
-        $dbname = "mysql";
+---
 
-        $conn = new mysqli($servername, $username, $password, $dbname);
-        if ($conn->connect_error) {
-          die("Connection failed: " . $conn->connect_error);
-        }
+## Zusammenfassung
 
-        $sql = "select Host, User from mysql.user;";
-        $result = $conn->query($sql);
-        while($row = $result->fetch_assoc()){
-          echo("<li>" . $row["Host"] . " / " . $row["User"] . "</li>");
-        }
-      ?>
-      </body>
-      </html>
-    owner: root:root
-    permissions: "0644"
-
-ssh_authorized_keys:
-  - ssh-rsa YOUR_PUBLIC_KEY Felipe@Felipe
-  - ssh-rsa TEACHER_PUBLIC_KEY lehrer@tbz
-
-runcmd:
-  - systemctl start docker
-  - systemctl enable docker
-  - cd /home/ubuntu && docker compose up -d --build
-  - sleep 30
-
-final_message: "Cloud-Init abgeschlossen. System ist bereit."
-```
-
-### Screenshots
-
-![alt text](images/image-3.png)
-![alt text](images/image-4.png)
+| Begriff | Erklärung |
+|---------|----------|
+| `docker compose up` | Startet alle Services aus der YAML-Datei |
+| `links` | Verknüpft Container und ermöglicht DNS-Auflösung |
+| `networks` | Eigenes Netzwerk für Container-Kommunikation |
+| `cloud-init` | Automatische Konfiguration bei VM-Erstellung |

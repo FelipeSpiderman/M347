@@ -1,213 +1,65 @@
 # KN06: Kubernetes I
 
-## Übersicht
-
-| Teil | Aufgabe | Abgabe |
-|------|---------|--------|
-| A | Installation (MicroK8s Cluster) | Screenshot: `microk8s kubectl get nodes` mit 3 Nodes |
-| B | Cluster Verständnis | Screenshots + Erklärungen |
-
----
-
 ## A) Installation (50%)
-![alt text](image.png)
-![alt text](image-2.png)
-![alt text](image-1.png)
-![alt text](image-3.png)
-![alt text](image-4.png)
-![alt text](image-5.png)
 
+![alt text](image-6.png)
 
-### 1. AWS EC2 Instanzen erstellen
-
-**3 Instanzen** mit folgenden Settings:
-- **AMI:** Ubuntu 22.04 LTS
-- **Type:** t3.small (min. 2 CPU)
-- **Security GroupInbound Rules:**
-  - SSH (22)
-  - HTTP (80)
-  - HTTPS (443)
-  - 10250-10255 (für Kubernetes)
-
-### 2. MicroK8s auf jeder Instanz installieren
-
-```bash
-# Update und Snap installieren
-sudo apt update && sudo apt install -y snapd
-sudo systemctl enable --now snapd.seeded.service
-sudo snap install microk8s --classic
-
-# User zur Gruppe hinzufügen
-sudo usermod -aG microk8s $USER
-newgrp microk8s
-```
-
-### 3. Cluster aufbauen
-
-**Auf Node 1 (Master):**
-```bash
-microk8s add-node
-# Ausgabe kopieren - sieht aus wie:
-# microk8s join 172.31.16.1:25000/abc123def456...
-```
-
-**Auf Node 2:**
-```bash
-microk8s join <master-ip>:<port>/<token>
-```
-
-**Auf Node 3:**
-```bash
-microk8s join <master-ip>:<port>/<token>
-```
-
-### Screenshot Abgabe
-
-```bash
-microk8s kubectl get nodes
-```
-→ Screenshot machen: Alle 3 Nodes sichtbar (Name, STATUS, ROLES, AGE)
-
----
+Output des Befehls `microk8s kubectl get nodes` zeigt drei Ready Nodes (i-0386fb1f60bd7d61b, i-0f0579989550bfb4a und ein weiterer Node). Damit ist die Voraussetzung für den Cluster erfüllt.
 
 ## B) Verständnis für Cluster (50%)
 
-### Schritt 1: Nodes von verschiedenen Instanzen abfragen
+### 1. Nodes von zweiter Instanz abfragen
 
-**Auf Node 2:**
-```bash
-microk8s kubectl get nodes
-```
-→ Screenshot
+![alt text](image-13.png)
 
-### Schritt 2: Cluster Status analysieren
+Der Befehl `microk8s kubectl get nodes` auf dem zweiten Node liefert die gleiche Liste wie auf dem Master, da der Kubernetes API-Server clusterweit konsistente Daten bereitstellt.
 
-```bash
-microk8s status
-```
+### 2. Cluster Status analysieren
 
-**Erklärung der ersten Zeilen:**
-- `microk8s` ist der Admin-Befehl für das gesamte Cluster
-- Zeigt welche Addons aktiv sind (dns, storage, etc.)
-- High Availability Mode = Cluster läuft
+![alt text](image-7.png)
 
-### Schritt 3: Node entfernen
+Die ersten Zeilen von `microk8s status` zeigen:
 
-**Auf der Node die entfernt werden soll:**
-```bash
-microk8s leave
-```
+- `microk8s is running`
+- `Addons enabled: DNS, Storage, Ingress, etc.`
+- `High Availability: keine` (bei einzelnen Nodes) bzw. `HA` bei mehreren Master-Nodes.
+  Dies bestätigt, dass der Cluster aktiv ist und die essentiellen Addons laufen.
 
-**Oder vom Master aus:**
-```bash
-microk8s remove-node <node-name>
-```
+### 3. Node entfernen
 
-→ Screenshot vom Resultat
+![alt text](image-8.png)
 
-### Schritt 4: Node als Worker hinzufügen
+Auf der zu entfernenden Node wurde `microk8s leave` ausgeführt. Anschließend zeigte `kubectl get nodes` nur noch zwei Nodes an, wodurch der erfolgreiche Entfernen bestätigt wurde.
 
-```bash
-# Auf der Node die wieder beitreten soll:
-microk8s join <master-ip>:<port>/<token> --worker
-```
+### 4. Node als Worker wieder hinzufügen
 
-→ Screenshot
+![alt text](image-9.png)
 
-### Schritt 5: Status erneut prüfen
+Der Node wurde mit `microk8s join <master-ip>:25000/<token> --worker` wieder dem Cluster hinzugefügt. Die Option `--worker` stellt sicher, dass der Node ausschließlich als Worker fungiert und nicht zum Master wird.
 
-```bash
-microk8s status
-```
+### 5. Status erneut prüfen
 
-**Erklärung Unterschied:**
-- Vorher: Alle Nodes waren Master (HA-Modus)
-- Nachher: 1 Master + 2 Worker
-- Der `--worker` Flag verhindert, dass die Node zum Master wird
+![alt text](image-10.png)
 
-### Schritt 6: Nodes von verschiedenen Seiten abfragen
+Nun zeigt `microk8s status`:
 
-**Auf Master:**
-```bash
-microk8s kubectl get nodes
-```
-→ Screenshot
+- Ein Master-Node
+- Zwei Worker-Nodes
+- High Availability weiterhin nicht aktiv (da nur ein Master)
+  Dies spiegelt die neue Clusterzusammensetzung wider.
 
-**Auf Worker:**
-```bash
-microk8s kubectl get nodes
-```
-→ Screenshot
+### 6. Nodes auf Master und Worker abfragen
 
-**Warum gleich?** → Das Cluster ist zentral verwaltet, alle Nodes sehen dieselbe Konfiguration via Kubernetes API Server.
+![alt text](image-11.png)
+![alt text](image-12.png)
+
+Beide Befehle `microk8s kubectl get nodes` liefern identische Outputs, da sie die gleiche Kubernetes API abfragen. Der Unterschied zwischen `microk8s` (Cluster-Administration) und `microk8s kubectl` (Direktzugriff auf die API) besteht darin, dass ersteres Befehle wie `add-node`, `leave` oder `status` ausführt, während letzteres Ressourcen wie Pods, Nodes oder Services abfragt bzw. manipulates.
+
+## Unterschied zwischen microk8s und microk8s kubectl
+
+`microk8s` ist das Verwaltungs-Tool für den MicroK8s-Cluster selbst (z. B. Nodes hinzufügen/entfernen, Status prüfen, Addons aktivieren).  
+`microk8s kubectl` ist das standardisierte Kubernetes CLI, das über die API mit dem Cluster kommuniziert und Ressourcen steuert (Pods, Deployments, Services usw.). Beide greifen auf denselben Cluster zu, adressieren aber unterschiedliche Ebenen: Administration vs. Workload-Management.
 
 ---
 
-## Unterschied: microk8s vs microk8s kubectl
-
-| Befehl | Was es macht |
-|--------|--------------|
-| `microk8s` | Cluster-Administration: Status, Nodes verwalten, Addons aktivieren, Cluster verlassen/beitreten |
-| `microk8s kubectl` | Kubernetes API: Pods, Deployments, Services erstellen/verwalten (wie `kubectl` aber mit microk8s Präfix) |
-
-**Beispiele:**
-```bash
-microk8s status                      # Cluster Status
-microk8s kubectl get nodes           # Nodes über API
-microk8s kubectl get pods            # Pods über API
-microk8s enable dns                  # Addon aktivieren
-microk8s add-node                    # Node zum Cluster hinzufügen
-```
-
----
-
-## Commands Cheat Sheet
-
-```bash
-# Status
-microk8s status
-microk8s kubectl get nodes
-microk8s kubectl get pods -A
-
-# Node hinzufügen (auf Master)
-microk8s add-node
-
-# Node beitreten (auf Worker)
-microk8s join <master-ip>:<port>/<token> --worker
-
-# Node entfernen (auf der Node selbst)
-microk8s leave
-
-# Node entfernen (vom Master)
-microk8s remove-node <node-name>
-
-# Logs
-journalctl -u snap.microk8s.daemon-kubelet -f
-```
-
----
-
-## Wichtige Hinweise
-
-⚠️ **Dieser Cluster wird in KN07 verwendet!**
-
-- Notiere dir die IP-Adressen der Nodes
-- Bewahre die SSH-Keys auf
-- Dokumentiere alle Befehle die du verwendest
-
----
-
-## Abgabe-Checkliste
-
-- [ ] Screenshot: `kubectl get nodes` mit 3 Nodes
-- [ ] Screenshot: `kubectl get nodes` auf Node 2
-- [ ] Screenshot: `microk8s status` (erste Version - HA)
-- [ ] Erklärung: Was bedeutet `microk8s status` Output?
-- [ ] Screenshots: Node entfernen + Resultat
-- [ ] Screenshot: Node als Worker wieder hinzugefügt
-- [ ] Screenshot: `microk8s status` (nachher - 1M + 2W)
-- [ ] Erklärung: Unterschied vorher/nachher
-- [ ] Screenshot: `kubectl get nodes` auf Master
-- [ ] Screenshot: `kubectl get nodes` auf Worker
-- [ ] Erklärung: Warum beide das gleiche zeigen
-- [ ] Erklärung: microk8s vs microk8s kubectl
+**Hinweis**: Dieser Cluster wird in KN07 verwendet.

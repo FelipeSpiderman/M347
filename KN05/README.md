@@ -1,218 +1,160 @@
 # KN05: Arbeit mit Speicher
 
-## Übersicht
-
-| Teil | Aufgabe        | Abgabe                             |
-| ---- | -------------- | ---------------------------------- |
-| A    | Bind Mounts    | Befehlsliste + Screencast          |
-| B    | Volumes        | Befehlsliste + Screencast          |
-| C    | Docker Compose | mount-Ausgabe + docker-compose.yml |
-
----
-
 ## A) Bind Mounts (40%)
 
-![alt text](image.png)
-![alt text](image-1.png)
+Ein Bind Mount verbindet ein Verzeichnis vom Host direkt in den Container. Änderungen auf dem Host sind sofort im Container sichtbar – ohne Rebuild.
 
-### Ziel
+![alt text](image-4.png)
+![alt text](image-5.png)
+![alt text](image-6.png)
+![alt text](image-7.png)
+![alt text](image-8.png)
 
-Speicher vom Host mit dem Container teilen. Änderungen auf Host sollen sofort im Container sichtbar sein.
+### Befehle
 
-### Durchführung
+```bash
+# Container mit Bind Mount starten
+docker run -d --name kn05-bind \
+  -v $(pwd)/kn05a:/mnt/host \
+  nginx:latest
 
-1. **Container mit Bind Mount erstellen:**
+# Skript im Container ausführen (liegt auf dem Host)
+docker exec kn05-bind bash /mnt/host/info.sh
+```
 
-   ```bash
-   docker run -d --name nginx-bind -p 8080:80 -v /home/felipe/Documents/Git/M347/KN05/host-folder:/usr/share/nginx/html nginx
-   ```
+### Ablauf
 
-   Oder unter Linux/Mac:
+1. Container `kn05-bind` mit nginx-Image gestartet, Host-Verzeichnis `kn05a/` eingebunden unter `/mnt/host`
+2. `info.sh` (Version 1) auf dem Host erstellt und im Container ausgeführt
+3. Skript auf dem Host zu Version 2 geändert (neue Infos hinzugefügt)
+4. Gleicher Container ohne Rebuild erneut ausgeführt → Änderungen sofort sichtbar
 
-   ```bash
-   docker run -d --name nginx-bind -p 8080:80 -v $(pwd)/host-folder:/usr/share/nginx/html nginx
-   ```
+**Screenshot Skript Version 1:**
 
-2. **Bash-Skript auf Host erstellen** (einzigartig - eigene Lösung):
+![Bind Mount v1](./image-1.png)
 
-   ```bash
-   #!/bin/bash
-   echo "Eigene eindeutige Ausgabe - [Dein Name]"
-   date
-   ```
+**Screenshot Skript Version 2 (auf Host geändert, kein Rebuild):**
 
-3. **Skript im Container ausführen:**
-
-   ```bash
-   docker exec nginx-bind bash /usr/share/nginx/html/script.sh
-   ```
-
-4. **Skript auf Host ändern und erneut ausführen** - Änderungen sind sofort sichtbar.
-
-### Abgabe
-
-- [ ] Befehlsliste dokumentieren
-- [ ] Screencast erstellen (vorher testen!)
+![Bind Mount v2](./image-2.png)
 
 ---
 
-## B) Volumes (30%)
+## B) Named Volumes (30%)
 
-![alt text](image-2.png)
-![alt text](image-3.png)
+Ein Named Volume wird von Docker verwaltet und kann von mehreren Containern gleichzeitig gemountet werden. Daten bleiben auch nach Container-Löschung erhalten.
 
-### Ziel
+### Befehle
 
-Zwei Container verwenden dasselbe Named Volume.
+```bash
+# Named Volume erstellen
+docker volume create kn05-shared
 
-### Durchführung
+# Zwei Container mit demselben Volume starten
+docker run -d --name kn05-vol1 -v kn05-shared:/shared nginx:latest
+docker run -d --name kn05-vol2 -v kn05-shared:/shared nginx:latest
 
-1. **Named Volume erstellen:**
+# Von vol1 schreiben
+docker exec kn05-vol1 bash -c 'echo "[vol1] Hallo von Container 1!" >> /shared/demo.txt'
 
-   ```bash
-   docker volume create shared-volume
-   ```
+# Von vol2 schreiben
+docker exec kn05-vol2 bash -c 'echo "[vol2] Hallo von Container 2!" >> /shared/demo.txt'
 
-2. **Zwei Container mit gleichem Volume starten:**
+# Von vol1 lesen (sieht auch vol2-Eintrag)
+docker exec kn05-vol1 bash -c 'cat /shared/demo.txt'
 
-   ```bash
-   docker run -d --name container1 -v shared-volume:/data nginx
-   docker run -d --name container2 -v shared-volume:/data nginx
-   ```
+# Von vol2 lesen (sieht auch vol1-Eintrag)
+docker exec kn05-vol2 bash -c 'cat /shared/demo.txt'
+```
 
-3. **In Datei schreiben und lesen:**
+**Screenshot – beide Container schreiben und lesen denselben Inhalt:**
 
-   ```bash
-   # Container 1: Schreiben
-   docker exec container1 sh -c 'echo "Von Container1" >> /data/test.txt'
-
-   # Container 2: Lesen
-   docker exec container2 cat /data/test.txt
-
-   # Container 2: Schreiben
-   docker exec container2 sh -c 'echo "Von Container2" >> /data/test.txt'
-
-   # Container 1: Lesen
-   docker exec container1 cat /data/test.txt
-   ```
-
-### Abgabe
-
-- [ ] Befehlsliste dokumentieren
-- [ ] Screencast erstellen (vorher testen!)
+![Named Volume](./image-3.png)
 
 ---
 
 ## C) Speicher mit Docker Compose (30%)
 
-### Ziel
+Die docker-compose Datei befindet sich unter `docker-compose.yml`. Sie definiert zwei Services: `kn05-web1` (mit allen drei Mount-Typen) und `kn05-web2` (nur mit named volume).
 
-Alle drei Speichertypen in docker-compose verwenden.
+### Unterschied Long vs. Short Syntax:
 
-### docker-compose.ymlCONTAINER
+- **Long syntax**: Vollständige Konfiguration mit `type`, `source`, `target` – nötig für tmpfs (kein `source`)
+- **Short syntax**: Kompaktes Format `volume:pfad` – für einfache Fälle ausreichend
 
-```yaml
-version: "3.8"
+### Abgaben
 
-services:
-  nginx1:
-    image: nginx
-    volumes:
-      # Named Volume - Long Syntax
-      - type: volume
-        source: my-named-volume
-        target: /data
-      # Bind Mount
-      - type: bind
-        source: ./bind-folder
-        target: /bind-mount
-      # tmpfs
-      - type: tmpfs
-        target: /tmpfs
-    ports:
-      - "8081:80"
+**`mount` im ersten Container (kn05-web1) – alle 3 Speichertypen sichtbar:**
 
-  nginx2:
-    image: nginx
-    # Named Volume - Short Syntax
-    volumes:
-      - my-named-volume:/data
-    ports:
-      - "8082:80"
+![web1 mount](./image.png)
 
-volumes:
-  my-named-volume:
+**`mount` im zweiten Container (kn05-web2) – nur Named Volume:**
+
+_(Kein zusätzlicher Screenshot vorhanden – bitte entsprechend erstellen oder das vorhandene Bild verwenden, falls es den zweiten Container zeigt.)_
+
+---
+
+## Beispielausgaben für Überprüfung
+
+Hier sind einige Beispielausgaben, die Sie erwarten sollten, wenn Sie die Aufgaben korrekt ausführen:
+
+### Für Teil A: Bind Mounts
+
+```bash
+# Beim Ausführen des ersten Skripts
+$ docker exec kn05-bind bash /mnt/host/info.sh
+=== System Information (Version 1) ===
+Hostname: ubuntu
+Uptime: up 1 day
 ```
 
-### Durchführung
+```bash
+# Nach Änderung auf dem Host und erneuter Ausführung
+$ docker exec kn05-bind bash /mnt/host/info.sh
+=== System Information (Version 2) ===
+Hostname: ubuntu
+Uptime: up 1 day
+CPU Usage: 15%
+```
 
-1. **docker-compose.yml erstellen** (siehe oben)
-2. **Container starten:**
-   ```bash
-   docker compose up -d
-   ```
-3. **mount Ausgabe abrufen:**
-   ```bash
-   docker exec kn05-nginx1-1 mount
-   docker exec kn05-nginx2-1 mount
-   ```
+### Für Teil B: Named Volumes
 
-### Abgabe
+```bash
+# Schreiben vom ersten Container
+$ docker exec kn05-vol1 bash -c 'echo "[vol1] Hallo von Container 1!" >> /shared/demo.txt'
 
-- [ ] mount Ausgabe von nginx1 (alle 3 Speichertypen)
-- [ ] mount Ausgabe von nginx2 (Named Volume)
-- [ ] docker-compose.yml
+# Lesen vom zweiten Container (zeigt beide Einträge)
+$ docker exec kn05-vol2 bash -c 'cat /shared/demo.txt'
+[vol1] Hallo von Container 1!
+[vol2] Hallo von Container 2!
+```
 
----
+### Für Teil C: Docker Compose
 
-## Abgabehinweise
+```bash
+# Im ersten Container (alle drei Mounts sichtbar)
+$ docker exec kn05-web1 mount | grep /data
+/dev/vda1 on /data/named type ext4 (rw,relatime)
+/dev/vda1 on /data/bind type ext4 (rw,relatime)
+tmpfs on /data/tmpfs type tmpfs (rw,relatime)
 
-1. **Befehle dokumentieren:** Alle verwendeten Befehle in dieses README oder separate Datei schreiben
-2. **Screencast:** Mit Bildschirmaufnahme-Tool aufnehmen (Praxistipps.de Link beachten)
-3. **Testen:** Vor dem Aufnehmen alles selbst testen!
-4. **Einreichung:** Gemäss den allgemeinen Abgabe-Informationen
+# Im zweiten Container (nur Named Volume)
+$ docker exec kn05-web2 mount | grep /data
+/dev/vda1 on /data/named type ext4 (rw,relatime)
+```
 
----
+## Wichtige Hinweise
 
-## Komplette Checkliste für die Abgabe
-
-### Teil A: Bind Mounts
-
-- [ ] Container mit Bind Mount starten (Befehl ins README)
-- [ ] script.sh in host-folder/ anpassen (eigene Lösung)
-- [ ] Im Container ausführen
-- [ ] Skript ändern, erneut ausführen
-- [ ] **Screencast aufnehmen**
-- [ ] Befehlsliste ins README dokumentieren
-
-### Teil B: Volumes
-
-- [ ] Named Volume erstellen
-- [ ] 2 Container starten
-- [ ] Gegenseitig schreiben/lesen
-- [ ] **Screencast aufnehmen**
-- [ ] Befehlsliste ins README dokumentieren
-
-### Teil C: Docker Compose
-
-- [ ] docker compose up -d
-- [ ] `docker exec kn05-nginx1 mount` ausführen → ins README
-- [ ] `docker exec kn05-nginx2 mount` ausführen → ins README
-- [ ] docker-compose.yml abgeben (bereit vorhanden)
+1. **Pfade anpassen**: Ersetzen Sie `$(pwd)/kn05a` durch den tatsächlichen Pfad zu Ihrem Host-Verzeichnis
+2. **Container-Namen**: Stellen Sie sicher, dass Ihre Container-Namen eindeutig sind
+3. **Volumes bereinigen**: Bei Bedarf können Sie Volumes mit `docker volume rm` entfernen
+4. **Berechtigungen**: Bei Problemen mit Zugriffsrechten prüfen Sie die Datei- und Verzeichnisberechtigungen auf dem Host
 
 ---
 
-## Dateien in diesem Ordner
+## Zusammenfassung
 
-- `script.sh` - Eigenes Bash-Skript für Teil A
-- `host-folder/` - Verzeichnis für Bind-Mount Teil A (script.sh hier rein!)
-- `docker-compose.yml` - Docker Compose für Teil C
-- `bind-folder/` - Bind-Mount-Verzeichnis für Teil C
-
-<!-- Hier eigene Notizen und Befehle hinzufügen -->
-
-### A) Bind Mounts - Eigene Befehle
-
-### B) Volumes - Eigene Befehle
-
-### C) Docker Compose - Eigene Befehle
+| Speichertyp  | Verwaltet von | Persistenz      | Mehrere Container | Typischer Einsatz       |
+| ------------ | ------------- | --------------- | ----------------- | ----------------------- |
+| Bind Mount   | Host          | Ja (Host-Datei) | Ja                | Entwicklung, Configs    |
+| Named Volume | Docker        | Ja              | Ja                | Produktion, Datenbanken |
+| tmpfs        | RAM           | Nein (flüchtig) | Nein              | Sensible Daten, Cache   |

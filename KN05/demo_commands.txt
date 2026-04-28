@@ -1,0 +1,33 @@
+ubuntu@docker:~$ # A) Bind Mounts
+
+ubuntu@docker:~$ # Container mit Bind Mount starten
+ubuntu@docker:~$ docker run -d --name kn05-bind \
+ubuntu@docker:~$   -v $(pwd)/kn05a:/mnt/host \
+ubuntu@docker:~$   nginx:latest
+ubuntu@docker:~$ # Skript im Container ausführen (liegt auf dem Host)
+ubuntu@docker:~$ docker exec kn05-bind bash /mnt/host/info.sh
+ubuntu@docker:~$ 
+
+ubuntu@docker:~$ # B) Named Volumes
+
+ubuntu@docker:~$ # Named Volume erstellen
+ubuntu@docker:~$ docker volume create kn05-shared
+ubuntu@docker:~$ # Zwei Container mit demselben Volume starten
+ubuntu@docker:~$ docker run -d --name kn05-vol1 -v kn05-shared:/shared nginx:latest
+ubuntu@docker:~$ docker run -d --name kn05-vol2 -v kn05-shared:/shared nginx:latest
+ubuntu@docker:~$ # Von vol1 schreiben
+ubuntu@docker:~$ docker exec kn05-vol1 bash -c 'echo "[vol1] Hallo von Container 1!" >> /shared/demo.txt'
+ubuntu@docker:~$ # Von vol2 schreiben
+ubuntu@docker:~$ docker exec kn05-vol2 bash -c 'echo "[vol2] Hallo von Container 2!" >> /shared/demo.txt'
+ubuntu@docker:~$ # Von vol1 lesen (sieht auch vol2-Eintrag)
+ubuntu@docker:~$ docker exec kn05-vol1 bash -c 'cat /shared/demo.txt'
+ubuntu@docker:~$ # Von vol2 lesen (sieht auch vol1-Eintrag)
+ubuntu@docker:~$ docker exec kn05-vol2 bash -c 'cat /shared/demo.txt'
+ubuntu@docker:~$ 
+
+ubuntu@docker:~$ # C) Speicher mit Docker Compose
+
+ubuntu@docker:~$ # Im ersten Container (alle drei Mounts sichtbar)
+ubuntu@docker:~$ docker exec kn05-web1 mount | grep /data
+ubuntu@docker:~$ # Im zweiten Container (nur Named Volume)
+ubuntu@docker:~$ docker exec kn05-web2 mount | grep /data

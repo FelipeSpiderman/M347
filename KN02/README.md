@@ -11,6 +11,9 @@ COPY helloworld.html .              # HTML-Datei ins Arbeitsverzeichnis kopieren
 EXPOSE 80                           # Port 80 nach aussen freigeben
 ```
 
+![alt text](image-1.png)
+![alt text](image.png)
+
 ### Docker Befehle
 
 ```bash
