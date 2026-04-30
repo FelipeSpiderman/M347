@@ -1,9 +1,9 @@
 # KN07 - Kubernetes II
 
-![alt text](images/image.png)
-![alt text](images/image-copy.png)
-![alt text](images/image-copy-2.png)
-![alt text](images/image-copy-3.png)
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
 
 ## Teil A: Begriffe und Konzepte
 
