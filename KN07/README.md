@@ -4,6 +4,9 @@
 ![alt text](image-1.png)
 ![alt text](image-2.png)
 ![alt text](image-3.png)
+![alt text](screen.png)
+![alt text](screen1.png)
+![alt text](screen2.png)
 
 ## Teil A: Begriffe und Konzepte
 
@@ -67,8 +70,6 @@ kubectl apply -f webapp-service.yaml
 microk8s kubectl describe service webapp-service
 ```
 
-**Screenshots**: [images/webapp-service-node1.png](images/webapp-service-node1.png), [images/webapp-service-node2.png](images/webapp-service-node2.png)
-
 ---
 
 #### 4. Unterschiede mongo-service vs webapp-service
@@ -78,8 +79,6 @@ microk8s kubectl describe service webapp-service
 ```bash
 microk8s kubectl describe service mongo-service
 ```
-
-**Screenshots**: [images/mongo-service.png](images/mongo-service.png)
 
 **Unterschied**:
 
@@ -91,11 +90,6 @@ microk8s kubectl describe service mongo-service
 #### 5. Web-App aufrufen
 
 **URL**: `http://<NODE_IP>:30100`
-
-**Screenshots**:
-
-- [images/webapp-browser-node1.png](images/webapp-browser-node1.png)
-- [images/webapp-browser-node2.png](images/webapp-browser-node2.png)
 
 **Erklärung**: Die Web-App ist über den NodePort 30100 auf jedem Node des Clusters erreichbar. Kubernetes leitet die Anfragen automatisch zum richtigen Pod.
 
@@ -122,10 +116,5 @@ microk8s kubectl describe service mongo-service
 kubectl apply -f webapp-service.yaml
 kubectl apply -f webapp-deployment.yaml
 ```
-
-**Screenshots**:
-
-- [images/webapp-updated.png](images/webapp-updated.png)
-- [images/webapp-service-updated.png](images/webapp-service-updated.png)
 
 **Erklärung**: Nach dem Update sind unter `Endpoints` drei IP-Adressen ersichtlich, was zeigt, dass der Traffic auf alle 3 Replicas verteilt wird.
